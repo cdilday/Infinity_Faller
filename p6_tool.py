@@ -6,6 +6,7 @@ from collections import defaultdict
 import p6_analysis
 
 TILE_SIZE = 32
+design = None
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -67,6 +68,10 @@ def display_design_on_canvas(canvas, design):
     item = event.widget.find_closest(event.x, event.y)[0]
     coords = rect_coords[item]
     elements[coords] = next_element(elements[coords])
+
+    
+
+
     display_design_on_canvas(canvas, design)
 
   def enter(event):
@@ -74,6 +79,25 @@ def display_design_on_canvas(canvas, design):
     item = event.widget.find_closest(event.x, event.y)[0]
     coords = rect_coords[item]
     i,j = coords
+
+    #override coords with lowest platform goal
+    found = False
+    y = height - 2
+    graph = design['elements']
+    while y > 2:
+      x = 1
+      while x < width - 1:
+        if graph[x,y] == 'E':
+          print graph[x,y]
+          coords = x, y-1
+          found = True
+          break
+        x += 1
+      if found:
+        break
+      y -= 1
+
+
     bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
     canvas.create_rectangle(bbox, outline='gray', tags=('inspection',), width=2)
 

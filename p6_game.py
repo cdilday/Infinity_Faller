@@ -1,7 +1,6 @@
 class Simulator(object):
 
   MOVES = [
-      'UP',
       'DOWN',
       'LEFT',
       'RIGHT',

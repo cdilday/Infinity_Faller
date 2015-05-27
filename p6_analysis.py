@@ -32,7 +32,11 @@ def analyze(design):
 			#print node
 			if sim.get_next_state((node[1],node[2]), move) != None:
 				pos, abil = sim.get_next_state((node[1],node[2]), move)
-				newState = (node[0] + 1, pos, abil)
+				value = 1
+				#check if it's moved diagonally downward and add distance accordingly
+				if pos[1] > node[1][1] and pos[0] != node[1][0]:
+					value = 1.2
+				newState = (node[0] + value, pos, abil)
 				states.append(newState)
 
 		#Use ANALYSIS like a prev dict, only each key now has states so the solution will be unique for each set of abilities
@@ -48,6 +52,7 @@ def analyze(design):
 
 def inspect(report, (i,j), draw_line):
 	#search the dict for every solution that starts with that pos, the build paths from each soltion back to the start
+	#print (i,j)
 	paths = []
 	for node in report:
 		if node[0] == (i, j):

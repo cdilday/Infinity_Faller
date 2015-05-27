@@ -7,7 +7,8 @@ E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A 0 A A A A A A A A E
-E A A A A A A E E E A A A A A A A E
+E A A A A A A A E E A A A A A A A E
+E A A A A A A A A A E E E E E E E E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
@@ -15,8 +16,7 @@ E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
 E A A A A A A A A A A A A A A A A E
-E A A A A A A A A A A A A A A A A E
-E A A A A A A A A A A A A A A A A E
+E A A A A A A A A A A A A E A A A E
 E A A A A A A A A A A A A A A A A E
 E F F F F F F F F F F F F F F F F E
 E E E E E E E E E E E E E E E E E E
