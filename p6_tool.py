@@ -6,7 +6,11 @@ from collections import defaultdict
 import p6_analysis
 
 TILE_SIZE = 32
+canvas = None
 design = None
+turn = 0
+playerLoc = None
+path = None
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -65,14 +69,14 @@ def display_design_on_canvas(canvas, design):
     )
 
   def click(event):
-    item = event.widget.find_closest(event.x, event.y)[0]
-    coords = rect_coords[item]
-    elements[coords] = next_element(elements[coords])
+    # item = event.widget.find_closest(event.x, event.y)[0]
+    # coords = rect_coords[item]
+    # elements[coords] = next_element(elements[coords])
+    take_turn()
 
-    
 
 
-    display_design_on_canvas(canvas, design)
+    # display_design_on_canvas(canvas, design)
 
   def enter(event):
     canvas.delete('inspection')
@@ -88,7 +92,7 @@ def display_design_on_canvas(canvas, design):
       x = 1
       while x < width - 1:
         if graph[x,y] == 'E':
-          print graph[x,y]
+          #print graph[x,y]
           coords = x, y-1
           found = True
           break
@@ -102,7 +106,8 @@ def display_design_on_canvas(canvas, design):
     canvas.create_rectangle(bbox, outline='gray', tags=('inspection',), width=2)
 
     try:
-      p6_analysis.inspect(report, coords, draw_inspection_line)
+      global path
+      path = p6_analysis.inspect(report, coords, draw_inspection_line)
     except:
       print_exc()
 
@@ -135,15 +140,60 @@ def load_design(filename):
 
   return {'elements': elements, 'specials': specials, 'width': cols, 'height': rows}
 
+def move_player((i,j)):
+  graph = design['elements']
+  playerLoc = design['specials'].items()[0][0]
+  print "moved player from old position: ", playerLoc
+  playerLoc = ((i, j))
+  print "to new position: ", playerLoc
+  design['specials'] = {}
+  design['specials'][playerLoc] = 0
+
+
+def take_turn():
+  global turn
+  turn += 1;
+  global path
+  if path is []:
+    print "Waiting"
+  else:
+    move_player(path[-1])
+    del path[-1]
+  if turn % 2 == 0:
+    global design
+    #move board up
+    print "Moving board"
+    #first check if player needs to be moved up because they're on the ground
+    playerLoc = design['specials'].items()[0][0]
+    graph = design['elements']
+    if graph[(playerLoc[0], playerLoc[1] + 1)] is 'E':
+      playerLoc = (playerLoc[0], playerLoc[1] - 1)
+    design['specials'] = {}
+    design['specials'][playerLoc] = 0
+    #now move the main portion of the map upwards
+    y = 3
+    while y < design['height'] - 3:
+      x = 0
+      while x < design['width']:
+        graph[x, y] = graph[x, y+1]
+        x += 1
+      y += 1
+
+    design['elements'] = graph
+  display_design_on_canvas(canvas, design)
+
+
 def main(argv):
 
   prog, filename = argv 
+  global design 
   design = load_design(filename)
 
   master = Tk()
-  master.title("Tears of the Mantis: Ascension to Flight [Design Tool]")
+  master.title("Tears of the Mantis: Fall to Chaos")
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
+  global canvas
   canvas = Canvas(master, width=w, height=h)
   canvas.pack()
 

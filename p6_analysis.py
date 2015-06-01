@@ -53,16 +53,16 @@ def analyze(design):
 def inspect(report, (i,j), draw_line):
 	#search the dict for every solution that starts with that pos, the build paths from each soltion back to the start
 	#print (i,j)
-	paths = []
+	path = []
 	for node in report:
 		if node[0] == (i, j):
 			currNode = node
 			offset = p6_tool.make_offset()
 			color = p6_tool.make_color()
 			while report[currNode] != None:
+				path.append(currNode[0])
 				draw_line(currNode[0], report[currNode][0], offset, color)
 				currNode = report[currNode]
-			
-	# TODO: use ANALYSIS and (i,j) draw some lines
-
+	
+	return path
 	#raise NotImplementedError
