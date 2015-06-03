@@ -4,11 +4,13 @@ from random import random, randint
 from collections import defaultdict
 
 import p6_analysis
+import copy
 
-TILE_SIZE = 32
+TILE_SIZE = 16
 canvas = None
 design = None
 turn = 0
+turns_to_move = 2
 playerLoc = None
 path = None
 
@@ -72,7 +74,21 @@ def display_design_on_canvas(canvas, design):
     # item = event.widget.find_closest(event.x, event.y)[0]
     # coords = rect_coords[item]
     # elements[coords] = next_element(elements[coords])
-    take_turn()
+    global turn
+    global design
+    #print design
+    if path == None:
+      print "no path"
+    if design == None:
+      print "no path"
+    if turn == None:
+      print "no path"
+    result = take_turn(design, turn, path[-1])
+    turn = result[0]
+    design = result[1]
+    del path[-1]
+    display_design_on_canvas(canvas, design)
+
 
 
 
@@ -81,14 +97,17 @@ def display_design_on_canvas(canvas, design):
   def enter(event):
     canvas.delete('inspection')
     item = event.widget.find_closest(event.x, event.y)[0]
-    coords = rect_coords[item]
-    i,j = coords
+    #coords = rect_coords[item]
+    #i,j = coords
+
+    coords = (0,0)
 
     #override coords with lowest platform goal
     found = False
     y = height - 2
     graph = design['elements']
-    while y > 2:
+    #print_map(design)
+    while y > 1:
       x = 1
       while x < width - 1:
         if graph[x,y] == 'E':
@@ -100,8 +119,9 @@ def display_design_on_canvas(canvas, design):
       if found:
         break
       y -= 1
+      #print coords
 
-
+    i,j = coords
     bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
     canvas.create_rectangle(bbox, outline='gray', tags=('inspection',), width=2)
 
@@ -140,49 +160,52 @@ def load_design(filename):
 
   return {'elements': elements, 'specials': specials, 'width': cols, 'height': rows}
 
-def move_player((i,j)):
-  graph = design['elements']
-  playerLoc = design['specials'].items()[0][0]
-  print "moved player from old position: ", playerLoc
-  playerLoc = ((i, j))
-  print "to new position: ", playerLoc
-  design['specials'] = {}
-  design['specials'][playerLoc] = 0
+def move_player((i,j), level):
+  #newGraph = level['elements']
+  playerPlace = level['specials'].items()[0][0]
+  #print "moved player from old position: ", playerLoc
+  playerPlace = ((i, j))
+  #print "to new position: ", playerLoc
+  level['specials'] = {}
+  level['specials'][playerPlace] = 0
+  return level
 
 
-def take_turn():
-  global turn
-  turn += 1;
-  global path
-  if path is []:
+def take_turn(board, turnNum, (i, j)):
+  newBoard = copy.copy(board)
+  turnNum += 1
+  if i is None:
     print "Waiting"
   else:
-    move_player(path[-1])
-    del path[-1]
-  if turn % 2 == 0:
-    global design
+    newBoard = move_player((i,j), newBoard)
+    #del path[-1]
+  if turnNum % turns_to_move == 0:
     #move board up
-    print "Moving board"
     #first check if player needs to be moved up because they're on the ground
-    playerLoc = design['specials'].items()[0][0]
-    graph = design['elements']
+    playerLoc = (newBoard['specials'].items()[0][0])
+    graph = newBoard['elements']
     if graph[(playerLoc[0], playerLoc[1] + 1)] is 'E':
       playerLoc = (playerLoc[0], playerLoc[1] - 1)
-    design['specials'] = {}
-    design['specials'][playerLoc] = 0
+    newBoard['specials'] = {}
+    newBoard['specials'][playerLoc] = 0
     #now move the main portion of the map upwards
-    y = 3
-    while y < design['height'] - 3:
+    y = 2
+    while y < newBoard['height'] - 3:
       x = 0
-      while x < design['width']:
+      while x < newBoard['width']:
         graph[x, y] = graph[x, y+1]
         x += 1
       y += 1
 
-    design['elements'] = graph
-  display_design_on_canvas(canvas, design)
+    newBoard['elements'] = graph
+  return (turnNum, newBoard)
 
-
+def print_map(board):
+  for y in range(0, board['height']):
+    tempstr = ""
+    for x in range(0, board['width']):
+      tempstr = tempstr + board['elements'][x,y]
+    print tempstr
 def main(argv):
 
   prog, filename = argv 
