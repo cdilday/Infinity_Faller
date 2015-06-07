@@ -80,20 +80,25 @@ def analyze_specific(thing, goal):
 
 	ANALYSIS = {init: None}
 
+	startingNode = (init[0], init[1], 0)
+	ANALYSIS[startingNode] = None
+
 	q = Q.PriorityQueue()
 	q.put((0, init[0], init[1], 0, tempDesign, sim))
 
 	while not q.empty():
 		node = q.get()
 		#no goal state required as we're doing an exhaustive search
-		#(distance from start, (point), abilities)
 		#(distance from start, (point), abilities, turn number, newDesign) 
 		# do move first, then check what the next available moves are
 
 		tempGoal = (goal[0], goal[1] - int(node[3] / turns_to_move))
 		if node[1] == tempGoal:
-			currNode = (node[1], node[2])
+			print "in here"
+			#need to make nodes contain data on design movements or else they can't move to the same place twice
+			currNode = (node[1], node[2], node[3])
 			while ANALYSIS[currNode] != None:
+				print currNode
 				path.append(currNode[0])
 				currNode = ANALYSIS[currNode]
 			break
@@ -117,9 +122,9 @@ def analyze_specific(thing, goal):
 
 		#Use ANALYSIS like a prev dict, only each key now has states so the solution will be unique for each set of abilities
 		for state in states:
-			curr = (state[1],state[2])
+			curr = (state[1],state[2], state[3])
 			if curr not in ANALYSIS:
-				ANALYSIS[curr] = (node[1],node[2])
+				ANALYSIS[curr] = (node[1],node[2],  node[3])
 				q.put(state)
 	return path
 

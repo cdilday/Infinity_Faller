@@ -156,7 +156,16 @@ def display_design_on_canvas(canvas, design):
   except:
     print_exc()
 
-  
+def fill_bottom_row(board):
+  # use this to load in levels from the generated design
+  # right now we'll just load it with empties until we get that implemented
+  empty_row = []
+  empty_row.append('E')
+  for i in range(1, board['width'] - 1 ):
+    empty_row.append('A')
+  empty_row.append('E')
+  for x in range(0, board['width']):
+    board['elements'][x, board['height'] - 3] = empty_row[x]
 
 def load_design(filename):
   with open(filename) as f:
@@ -213,6 +222,8 @@ def take_turn(board, turnNum, pos):
         graph[x, y] = graph[x, y+1]
         x += 1
       y += 1
+
+    fill_bottom_row(board)
 
     newBoard['elements'] = graph
   return (turnNum, newBoard)
