@@ -87,12 +87,24 @@ def display_design_on_canvas(canvas, design):
     turn = result[0]
     design = result[1]
     del path[-1]
-    display_design_on_canvas(canvas, design)
+    #display_design_lite(canvas, design)
+    elements = design['elements']
+    specials = design['specials']
 
+    rect_coords = {}
+    for i in range(width):
+      for j in range(height):
+        bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
+        color = ELEMENT_COLORS[elements[i,j]]
+        rect = canvas.create_rectangle(bbox, fill=color, tags=('tile',), outline='')
+        rect_coords[rect] = (i,j)
 
+    shrink = 1
+    for (i,j),k in specials.items():
+      bbox = (TILE_SIZE*i+shrink, TILE_SIZE*j+shrink, TILE_SIZE*(i+1)-shrink, TILE_SIZE*(j+1)-shrink)
+      canvas.create_oval(bbox, fill='', outline='red',width=2)
 
-
-    # display_design_on_canvas(canvas, design)
+    p6_analysis.draw_path(path, draw_inspection_line)
 
   def enter(event):
     canvas.delete('inspection')
@@ -127,7 +139,8 @@ def display_design_on_canvas(canvas, design):
 
     try:
       global path
-      path = p6_analysis.inspect(report, coords, draw_inspection_line)
+      path = p6_analysis.analyze_specific(design, coords)
+      p6_analysis.draw_path(path, draw_inspection_line)
     except:
       print_exc()
 
@@ -135,7 +148,8 @@ def display_design_on_canvas(canvas, design):
   canvas.tag_bind('tile','<Enter>',enter)
   
   try:
-    report = p6_analysis.analyze(design)
+    global path
+    #report, path = p6_analysis.analyze_specific(design)
   except:
     print_exc()
 
