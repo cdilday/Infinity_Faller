@@ -28,7 +28,7 @@ def make_offset():
          TILE_SIZE*(0.125+0.75*random())
 
 def make_color():
-  return '#'+hex(randint(256,4096))[2:]
+  return '#00FFFF'
 
 OFFSETS = defaultdict(make_offset)
 COLORS = defaultdict(make_color)
@@ -135,10 +135,11 @@ def display_design_on_canvas(canvas, design):
     x = 1
     while x < width - 1:
       if graph[x,y] == 'E':
-        #print graph[x,y]
-        coords = x, y-1
-        found = True
-        break
+        #check to make sure it's empty above it
+        if graph[x, y-1] != 'E':
+          coords = x, y-1
+          found = True
+          break
       x += 1
     if found:
       break
@@ -155,17 +156,6 @@ def display_design_on_canvas(canvas, design):
     p6_analysis.draw_path(path, draw_inspection_line)
   except:
     print_exc()
-
-def fill_bottom_row(board):
-  # use this to load in levels from the generated design
-  # right now we'll just load it with empties until we get that implemented
-  empty_row = []
-  empty_row.append('E')
-  for i in range(1, board['width'] - 1 ):
-    empty_row.append('A')
-  empty_row.append('E')
-  for x in range(0, board['width']):
-    board['elements'][x, board['height'] - 3] = empty_row[x]
 
 def load_design(filename):
   with open(filename) as f:
@@ -228,12 +218,24 @@ def take_turn(board, turnNum, pos):
     newBoard['elements'] = graph
   return (turnNum, newBoard)
 
+def fill_bottom_row(board):
+  # use this to load in levels from the generated design
+  # right now we'll just load it with empties until we get that implemented
+  empty_row = []
+  empty_row.append('E')
+  for i in range(1, board['width'] - 1 ):
+    empty_row.append('A')
+  empty_row.append('E')
+  for x in range(0, board['width']):
+    board['elements'][x, board['height'] - 3] = empty_row[x]
+
 def print_map(board):
   for y in range(0, board['height']):
     tempstr = ""
     for x in range(0, board['width']):
       tempstr = tempstr + board['elements'][x,y]
     print tempstr
+
 def main(argv):
 
   prog, filename = argv 
