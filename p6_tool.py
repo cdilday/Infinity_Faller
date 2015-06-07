@@ -84,6 +84,7 @@ def display_design_on_canvas(canvas, design):
     else:
       result = take_turn(design, turn, path[-1])
       del path[-1]
+    print "---" ,len(path)
     turn = result[0]
     design = result[1]
     #display_design_lite(canvas, design)
@@ -223,6 +224,73 @@ def print_map(board):
     for x in range(0, board['width']):
       tempstr = tempstr + board['elements'][x,y]
     print tempstr
+
+def generate_map(width, height):
+
+  specials = {}
+  elements = {}
+
+  
+  # two horizontal edges
+  for row in range(width): # range (x,y) --> x <= n < y
+    #print elements[row,0]
+    elements[row, 0] = 'E'
+    elements[row, height-1] = 'E' # height - 1 is the lowest index
+    # first_row_box = (TILE_SIZE*row, TILE_SIZE*0, TILE_SIZE*(row+1), TILE_SIZE*(1))
+    # last_row_box = (TILE_SIZE*row, TILE_SIZE*height-1, TILE_SIZE*(row+1), TILE_SIZE*(height-1+1))
+    
+    # f_color = ELEMENT_COLORS['E']
+    # l_color = ELEMENT_COLORS['E']
+    # f_rect = canvas.create_rectangle(first_row_box, fill=f_color, tags=('tile',), outline='')
+    # l_rect = canvas.create_rectangle(last_row_box, fill=l_color, tags=('tile',), outline='')
+    # rect_coords[f_rect] = (row,0)
+    # rect_coords[l_rect] = (row,height-1)
+
+  # two vertical edges
+  for col in range(height): 
+    elements[0, col] = 'E'
+    elements[width-1, col] = 'E' # width - 1 is the right most index
+    # first_col_box = (TILE_SIZE*0, TILE_SIZE*col, TILE_SIZE*(0+1), TILE_SIZE*(col+1))
+    # last_col_box = (TILE_SIZE*width-1, TILE_SIZE*col, TILE_SIZE*(width-1+1), TILE_SIZE*(col+1))
+    # f_olor = ELEMENT_COLORS['E']
+    # l_olor = ELEMENT_COLORS['E']
+    # f_rect = canvas.create_rectangle(first_col_box, fill=f_color, tags=('tile',), outline='')
+    # l_rect = canvas.create_rectangle(last_col_box, fill=l_color, tags=('tile',), outline='')
+    # rect_coords[first_col_box] = (0,col)
+    # rect_coords[last_col_box] = (width-1,col)
+
+  # assign dead zone 
+  for dead_zone in range (1, width-1): 
+    elements[dead_zone, 1] = 'F'
+    elements[dead_zone, height-2] = 'F'
+    # top_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*1, TILE_SIZE*(dead_zone+1), TILE_SIZE*(1+1))
+    # bot_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*(height-2), TILE_SIZE*(dead_zone+1), TILE_SIZE*(height-2+1))
+    # t_color = ELEMENT_COLORS['F']
+    # b_color = ELEMENT_COLORS['F']
+    # t_rect = canvas.create_rectangle(top_dead_box, fill=t_color, tags=('tile',), outline='')
+    # b_rect = canvas.create_rectangle(bot_dead_box, fill=b_color, tags=('tile',), outline='')
+    # rect_coords[t_rect] = (dead_zone,1)
+    # rect_coords[b_rect] = (dead_zone,height-2)
+
+  max_earth = 10
+  for y_room in range(2, height-2):
+    for x_room in range(1, width-1):
+      elements[x_room, y_room] = 'A'
+
+  for e in range(max_earth+1):
+    rand_x = randint(1, width-1)
+    rand_y = randint(2, height-2-1)
+    #if specials[(rand_x, rand_y)] is None:
+    elements[rand_x, rand_y] = 'E'
+  
+
+  specials[(3,3)] = 0
+  elements[(3,4)] = 'E'
+
+  return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
+
+
+
 def main(argv):
 
   prog, filename = argv 
@@ -233,6 +301,12 @@ def main(argv):
   master.title("Tears of the Mantis: Fall to Chaos")
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
+
+  width = design['width'] 
+  height = design['height']
+  design = {}
+  
+  design = generate_map(width, height)
   global canvas
   canvas = Canvas(master, width=w, height=h)
   canvas.pack()
