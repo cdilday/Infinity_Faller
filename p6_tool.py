@@ -77,16 +77,15 @@ def display_design_on_canvas(canvas, design):
     global turn
     global design
     #print design
-    if path == None:
-      print "no path"
-    if design == None:
-      print "no path"
-    if turn == None:
-      print "no path"
-    result = take_turn(design, turn, path[-1])
+    result = None
+    if len(path) is 0:
+      print "Waiting"
+      result = take_turn(design, turn, design['specials'].items()[0][0])
+    else:
+      result = take_turn(design, turn, path[-1])
+      del path[-1]
     turn = result[0]
     design = result[1]
-    del path[-1]
     #display_design_lite(canvas, design)
     elements = design['elements']
     specials = design['specials']
@@ -189,13 +188,13 @@ def move_player((i,j), level):
   return level
 
 
-def take_turn(board, turnNum, (i, j)):
+def take_turn(board, turnNum, pos):
   newBoard = copy.copy(board)
   turnNum += 1
-  if i is None:
+  if pos is None:
     print "Waiting"
   else:
-    newBoard = move_player((i,j), newBoard)
+    newBoard = move_player(pos, newBoard)
     #del path[-1]
   if turnNum % turns_to_move == 0:
     #move board up
