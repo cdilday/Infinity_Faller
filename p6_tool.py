@@ -13,6 +13,7 @@ turn = 0
 turns_to_move = 2
 playerLoc = None
 path = None
+new_elements = {}
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -39,7 +40,6 @@ def next_element(e):
 def display_design_on_canvas(canvas, design):
   canvas.delete(ALL)
 
-  
   width, height = design['width'], design['height']
   elements = design['elements']
   specials = design['specials']
@@ -84,7 +84,28 @@ def display_design_on_canvas(canvas, design):
     else:
       result = take_turn(design, turn, path[-1])
       del path[-1]
-    print "---" ,len(path)
+  
+    if len(path) is 0:
+      pass
+
+    global new_elements
+    # if (new_elements):
+    #   print len(new_elements)
+    # else:
+    #   print 0
+
+    if len(path) is 0 and len(new_elements) is 0:
+      new_elements = generate_map(design['width'], design['height'])
+
+    #print len (new_elements)
+
+    # for x in range(1, design['width']):
+    #   del new_elements[x, 3] 
+    # print len (new_elements)
+
+
+
+
     turn = result[0]
     design = result[1]
     #display_design_lite(canvas, design)
@@ -222,10 +243,17 @@ def take_turn(board, turnNum, pos):
 def fill_bottom_row(board):
   # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
+  global new_elements
   empty_row = []
   empty_row.append('E')
   for i in range(1, board['width'] - 1 ):
-    empty_row.append('A')
+    if len(new_elements) is 0:
+      empty_row.append('A')
+    else:
+      ele = new_elements[i, 3]
+      empty_row.append(ele)
+      del new_elements[i, 3]
+
   empty_row.append('E')
   for x in range(0, board['width']):
     board['elements'][x, board['height'] - 3] = empty_row[x]
@@ -243,65 +271,76 @@ def generate_map(width, height):
   elements = {}
 
   
-  # two horizontal edges
-  for row in range(width): # range (x,y) --> x <= n < y
-    #print elements[row,0]
-    elements[row, 0] = 'E'
-    elements[row, height-1] = 'E' # height - 1 is the lowest index
-    # first_row_box = (TILE_SIZE*row, TILE_SIZE*0, TILE_SIZE*(row+1), TILE_SIZE*(1))
-    # last_row_box = (TILE_SIZE*row, TILE_SIZE*height-1, TILE_SIZE*(row+1), TILE_SIZE*(height-1+1))
+  # # two horizontal edges
+  # for row in range(width): # range (x,y) --> x <= n < y
+  #   #print elements[row,0]
+  #   elements[row, 0] = 'E'
+  #   elements[row, height-1] = 'E' # height - 1 is the lowest index
+  #   # first_row_box = (TILE_SIZE*row, TILE_SIZE*0, TILE_SIZE*(row+1), TILE_SIZE*(1))
+  #   # last_row_box = (TILE_SIZE*row, TILE_SIZE*height-1, TILE_SIZE*(row+1), TILE_SIZE*(height-1+1))
     
-    # f_color = ELEMENT_COLORS['E']
-    # l_color = ELEMENT_COLORS['E']
-    # f_rect = canvas.create_rectangle(first_row_box, fill=f_color, tags=('tile',), outline='')
-    # l_rect = canvas.create_rectangle(last_row_box, fill=l_color, tags=('tile',), outline='')
-    # rect_coords[f_rect] = (row,0)
-    # rect_coords[l_rect] = (row,height-1)
+  #   # f_color = ELEMENT_COLORS['E']
+  #   # l_color = ELEMENT_COLORS['E']
+  #   # f_rect = canvas.create_rectangle(first_row_box, fill=f_color, tags=('tile',), outline='')
+  #   # l_rect = canvas.create_rectangle(last_row_box, fill=l_color, tags=('tile',), outline='')
+  #   # rect_coords[f_rect] = (row,0)
+  #   # rect_coords[l_rect] = (row,height-1)
 
-  # two vertical edges
-  for col in range(height): 
-    elements[0, col] = 'E'
-    elements[width-1, col] = 'E' # width - 1 is the right most index
-    # first_col_box = (TILE_SIZE*0, TILE_SIZE*col, TILE_SIZE*(0+1), TILE_SIZE*(col+1))
-    # last_col_box = (TILE_SIZE*width-1, TILE_SIZE*col, TILE_SIZE*(width-1+1), TILE_SIZE*(col+1))
-    # f_olor = ELEMENT_COLORS['E']
-    # l_olor = ELEMENT_COLORS['E']
-    # f_rect = canvas.create_rectangle(first_col_box, fill=f_color, tags=('tile',), outline='')
-    # l_rect = canvas.create_rectangle(last_col_box, fill=l_color, tags=('tile',), outline='')
-    # rect_coords[first_col_box] = (0,col)
-    # rect_coords[last_col_box] = (width-1,col)
+  # # two vertical edges
+  # for col in range(height): 
+  #   elements[0, col] = 'E'
+  #   elements[width-1, col] = 'E' # width - 1 is the right most index
+  #   # first_col_box = (TILE_SIZE*0, TILE_SIZE*col, TILE_SIZE*(0+1), TILE_SIZE*(col+1))
+  #   # last_col_box = (TILE_SIZE*width-1, TILE_SIZE*col, TILE_SIZE*(width-1+1), TILE_SIZE*(col+1))
+  #   # f_olor = ELEMENT_COLORS['E']
+  #   # l_olor = ELEMENT_COLORS['E']
+  #   # f_rect = canvas.create_rectangle(first_col_box, fill=f_color, tags=('tile',), outline='')
+  #   # l_rect = canvas.create_rectangle(last_col_box, fill=l_color, tags=('tile',), outline='')
+  #   # rect_coords[first_col_box] = (0,col)
+  #   # rect_coords[last_col_box] = (width-1,col)
 
-  # assign dead zone 
-  for dead_zone in range (1, width-1): 
-    elements[dead_zone, 1] = 'F'
-    elements[dead_zone, height-2] = 'F'
-    # top_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*1, TILE_SIZE*(dead_zone+1), TILE_SIZE*(1+1))
-    # bot_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*(height-2), TILE_SIZE*(dead_zone+1), TILE_SIZE*(height-2+1))
-    # t_color = ELEMENT_COLORS['F']
-    # b_color = ELEMENT_COLORS['F']
-    # t_rect = canvas.create_rectangle(top_dead_box, fill=t_color, tags=('tile',), outline='')
-    # b_rect = canvas.create_rectangle(bot_dead_box, fill=b_color, tags=('tile',), outline='')
-    # rect_coords[t_rect] = (dead_zone,1)
-    # rect_coords[b_rect] = (dead_zone,height-2)
+  # # assign dead zone 
+  # for dead_zone in range (1, width-1): 
+  #   elements[dead_zone, 1] = 'F'
+  #   elements[dead_zone, height-2] = 'F'
+  #   # top_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*1, TILE_SIZE*(dead_zone+1), TILE_SIZE*(1+1))
+  #   # bot_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*(height-2), TILE_SIZE*(dead_zone+1), TILE_SIZE*(height-2+1))
+  #   # t_color = ELEMENT_COLORS['F']
+  #   # b_color = ELEMENT_COLORS['F']
+  #   # t_rect = canvas.create_rectangle(top_dead_box, fill=t_color, tags=('tile',), outline='')
+  #   # b_rect = canvas.create_rectangle(bot_dead_box, fill=b_color, tags=('tile',), outline='')
+  #   # rect_coords[t_rect] = (dead_zone,1)
+  #   # rect_coords[b_rect] = (dead_zone,height-2)
 
   max_earth = 10
+  even = 0
   for y_room in range(2, height-2):
+
     for x_room in range(1, width-1):
       elements[x_room, y_room] = 'A'
 
-  for e in range(max_earth+1):
-    rand_x = randint(1, width-1)
-    rand_y = randint(2, height-2-1)
-    #if specials[(rand_x, rand_y)] is None:
-    elements[rand_x, rand_y] = 'E'
+    if y_room % 2 == 0:
+      rand_x = randint(1, width-1)
+      elements[rand_x, y_room] = 'E'
+      elements[rand_x+1, y_room] = 'E'
+      # if randint(0, 10) > 5:
+      #   elements[rand_x+2, y_room] = 'E'
+
+
+  # for e in range(max_earth+1):
+  #   rand_x = randint(1, width-1)
+  #   rand_y = randint(2, height-2-1)
+  #   #if specials[(rand_x, rand_y)] is None:
+  #   elements[rand_x, rand_y] = 'E'
+  #   elements[rand_x+1, rand_y] = 'E'
   
 
   specials[(3,3)] = 0
   elements[(3,3)] = 'A'
-
   elements[(3,4)] = 'E'
 
-  return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
+  return elements
+  #return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
 
 
 def main(argv):
@@ -317,9 +356,9 @@ def main(argv):
 
   width = design['width'] 
   height = design['height']
-  #design = {}
+  # design = {}
   
-  #design = generate_map(width, height)
+  # design = generate_map(width, height)
   global canvas
   canvas = Canvas(master, width=w, height=h)
   canvas.pack()
