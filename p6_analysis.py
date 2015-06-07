@@ -1,6 +1,7 @@
 from p6_game import Simulator
 from heapq import heappush, heappop
 import copy
+import math
 try:
     import Queue as Q  # ver. < 3.0
 except ImportError:
@@ -96,7 +97,7 @@ def analyze_specific(thing, goal):
 		if node[1] == tempGoal:
 			print "in here"
 			#need to make nodes contain data on design movements or else they can't move to the same place twice
-			currNode = (node[1], node[2], node[3])
+			currNode = (node[1], node[2], int(node[3] / turns_to_move))
 			while ANALYSIS[currNode] != None:
 				print currNode
 				path.append(currNode[0])
@@ -122,11 +123,18 @@ def analyze_specific(thing, goal):
 
 		#Use ANALYSIS like a prev dict, only each key now has states so the solution will be unique for each set of abilities
 		for state in states:
-			curr = (state[1],state[2], state[3])
-			if curr not in ANALYSIS:
-				ANALYSIS[curr] = (node[1],node[2],  node[3])
+			curr = (state[1],state[2], int(state[3] / turns_to_move))
+			tent_score = state[0] + distance_heuristic(state[1], tempGoal)
+			if curr not in ANALYSIS or tent_score < state[0]:
+				ANALYSIS[curr] = (node[1], node[2], int(node[3] / turns_to_move))
+				state = (tent_score, state[1], state[2], state[3], state[4])
 				q.put(state)
 	return path
+
+def distance_heuristic(goal, curr):
+	dist = math.sqrt(((goal[0] - curr[0]) * (goal[0] - curr[0])) + ((goal[1] - curr[1]) * (goal[1] - curr[1])))
+	return dist
+
 
 def draw_path(path, draw_line):	
 	index = len(path) - 1
