@@ -284,32 +284,26 @@ def take_turn(board, turnNum, pos):
   return (turnNum, newBoard)
 
 def fill_bottom_row(board):
-  # use this to load in levels from the generated design
+   # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
+
   global new_elements
   global line_counter
 
-  if 2+line_counter == 20 :
+  if 2 +line_counter ==  board['height']-2 :
     line_counter = 0
 
-  empty_row = []
-  empty_row.append('E')
-  for i in range(1, board['width'] - 1 ):
-    if len(new_elements) is 0:
-      line_counter = 0
-      empty_row.append('A')
+  for x in range(0, board['width']):
+    if (x == 0 or x == board['width'] - 1 ):
+      board['elements'][x, board['height'] - 3] = 'E'
+    elif len(new_elements) is 0:
+      board['elements'][x, board['height'] - 3] = 'A'
     else:
-      # print len(new_elements), " ===in fill"
-      ele = new_elements[i, 2+line_counter]
-      empty_row.append(ele)
-      del new_elements[i, 2+line_counter]
-    
+      board['elements'][x, board['height'] - 3] = new_elements[x, 2+line_counter]
+      del new_elements[x, 2+line_counter]
 
   line_counter += 1
 
-  empty_row.append('E')
-  for x in range(0, board['width']):
-    board['elements'][x, board['height'] - 3] = empty_row[x]
 
 def print_map(board):
   for y in range(0, board['height']):
