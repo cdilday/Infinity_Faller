@@ -132,6 +132,7 @@ def display_design_on_canvas(canvas, design):
     p6_analysis.draw_path(path, draw_inspection_line)
 
   def enter(event):
+    filler = 1+1
     #item = event.widget.find_closest(event.x, event.y)[0]
     #coords = rect_coords[item]
 
