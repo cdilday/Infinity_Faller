@@ -133,7 +133,7 @@ def analyze_specific(thing, goal):
 			tent_score = state[0] + distance_heuristic(state[1], tempGoal)
 			# ignore nodes that are stalling; they already have no valid path
 			if init[0][1] - state[1][1] <= 1:
-				if (curr not in ANALYSIS or tent_score < state[0]) and state[1][1] <= tempGoal[1] :
+				if (curr not in ANALYSIS or tent_score < node[0]) and state[1][1] <= tempGoal[1] :
 					#need to make nodes contain data on design movements or else they can't move to the same place twice
 					ANALYSIS[curr] = (node[1], node[2], int(node[3] / turns_to_move))
 					state = (tent_score, state[1], state[2], state[3], state[4])
