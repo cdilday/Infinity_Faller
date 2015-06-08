@@ -80,20 +80,20 @@ def display_design_on_canvas(canvas, design):
     # elements[coords] = next_element(elements[coords])
     global turn
     global design
+    deletion = False
     #print design
     result = None
     if len(path) is 0:
       print "drawing new path"
-      # result = take_turn(design, turn, design['specials'].items()[0][0])
       redraw_path()
       if len(path) is 0:
         result = take_turn(design, turn, design['specials'].items()[0][0])
       else:
         result = take_turn(design, turn, path[-1])
-        del path[-1]
+        deletion = True
     else:
       result = take_turn(design, turn, path[-1])
-      del path[-1]
+      deletion = True
     
     global new_elements
     # if (new_elements):
@@ -136,6 +136,8 @@ def display_design_on_canvas(canvas, design):
       canvas.create_oval(bbox, fill='', outline='red',width=2)
 
     p6_analysis.draw_path(path, draw_inspection_line)
+    if deletion:
+      del path[-1]
 
   def enter(event):
     filler = 1+1
