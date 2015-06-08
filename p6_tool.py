@@ -96,22 +96,9 @@ def display_design_on_canvas(canvas, design):
       deletion = True
     
     global new_elements
-    # if (new_elements):
-    #   print len(new_elements)
-    # else:
-    #   print 0
-
+  
     if len(path) is 0 and len(new_elements) is 0:
       new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
-      print len(new_elements), "make"
-
-    #print len (new_elements)
-
-    # for x in range(1, design['width']):
-    #   del new_elements[x, 3] 
-    # print len (new_elements)
-
-
 
 
     turn = result[0]
@@ -212,6 +199,7 @@ def display_design_on_canvas(canvas, design):
 
     i,j = coords
     bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
+    global canvas
     canvas.create_rectangle(bbox, outline='gray', tags=('inspection',), width=2)
 
     try:
@@ -243,7 +231,7 @@ def load_design(filename):
 
 def move_player((i,j), level):
   #newGraph = level['elements']
-  playerPlace = level['specials'].items()[0][0]
+  #playerPlace = level['specials'].items()[0][0]
   #print "moved player from old position: ", playerLoc
   playerPlace = ((i, j))
   #print "to new position: ", playerLoc
@@ -290,7 +278,7 @@ def fill_bottom_row(board):
   global new_elements
   global line_counter
 
-  if 2 +line_counter ==  board['height']-2 :
+  if 2 + line_counter == board['height']-2 :
     line_counter = 0
 
   for x in range(0, board['width']):
@@ -423,9 +411,8 @@ def main(argv):
   canvas.pack()
 
   global new_elements
-
   new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
-  print "in main", len(new_elements)
+  
 
   display_design_on_canvas(canvas, design)
 
