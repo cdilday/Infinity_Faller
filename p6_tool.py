@@ -81,7 +81,9 @@ def display_design_on_canvas(canvas, design):
     #print design
     result = None
     if len(path) is 0:
-      print "Waiting"
+      print "drawing new path"
+      # result = take_turn(design, turn, design['specials'].items()[0][0])
+      redraw_path()
       result = take_turn(design, turn, design['specials'].items()[0][0])
     else:
       result = take_turn(design, turn, path[-1])
@@ -130,13 +132,8 @@ def display_design_on_canvas(canvas, design):
     p6_analysis.draw_path(path, draw_inspection_line)
 
   def enter(event):
-    # if we want to do something on hover over, this is where we'd do it
-    filler = 1 + 1
-    #canvas.delete('inspection')
     #item = event.widget.find_closest(event.x, event.y)[0]
     #coords = rect_coords[item]
-    #i,j = coords
-
 
     # try:
     #   global path
@@ -180,6 +177,42 @@ def display_design_on_canvas(canvas, design):
     p6_analysis.draw_path(path, draw_inspection_line)
   except:
     print_exc()
+
+  def redraw_path():
+    coords = (0,0)
+
+    #override coords with lowest platform goal
+    found = False
+    y = design['height'] - 2
+    graph = design['elements']
+    #print_map(design)
+    while y > 1:
+      x = 1
+      while x < design['width'] - 1:
+        if graph[x,y] == 'E':
+          #check to make sure it's empty above it
+          if graph[x, y-1] != 'E':
+            coords = x, y-1
+            found = True
+            break
+        x += 1
+      if found:
+        break
+      y -= 1
+      #print coords
+
+    i,j = coords
+    bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
+    canvas.create_rectangle(bbox, outline='gray', tags=('inspection',), width=2)
+
+    try:
+      global path
+      print_map(design)
+      path = p6_analysis.analyze_specific(design, coords)
+      p6_analysis.draw_path(path, draw_inspection_line)
+    except:
+      print_exc()
+
 
 def load_design(filename):
   with open(filename) as f:
