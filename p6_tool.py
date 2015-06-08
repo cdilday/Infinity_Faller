@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import p6_analysis
 import copy
+import time
 
 TILE_SIZE = 16
 canvas = None
@@ -311,7 +312,7 @@ def main(argv):
   design = load_design(filename)
 
   master = Tk()
-  master.title("Tears of the Mantis: Fall to Chaos")
+  master.title("Infinity Fall")
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
 

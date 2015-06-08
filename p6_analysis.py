@@ -2,6 +2,7 @@ from p6_game import Simulator
 from heapq import heappush, heappop
 import copy
 import math
+import time
 try:
     import Queue as Q  # ver. < 3.0
 except ImportError:
@@ -16,7 +17,7 @@ def analyze(thing):
 	tempDesign = copy.deepcopy(thing)
 	sim = Simulator(tempDesign)
 	init = sim.get_initial_state()
-
+	startTime = time.time()
 
 	ANALYSIS = {init: None}
 
@@ -51,6 +52,8 @@ def analyze(thing):
 			if curr not in ANALYSIS:
 				ANALYSIS[curr] = (node[1],node[2])
 				q.put(state)
+
+	print "Time taken: ", time.time() - startTime
 	return ANALYSIS
 	# TODO: fill in this function, populating the ANALYSIS dict
 	#raise NotImplementedError
@@ -73,6 +76,7 @@ def inspect(report, (i,j), draw_line):
 	#raise NotImplementedError
 
 def analyze_specific(thing, goal):
+	startTime = time.time()
 	tempDesign = copy.deepcopy(thing)
 	sim = Simulator(tempDesign)
 	init = sim.get_initial_state()
@@ -89,22 +93,19 @@ def analyze_specific(thing, goal):
 
 	while not q.empty():
 		node = q.get()
-		#no goal state required as we're doing an exhaustive search
-		#(distance from start, (point), abilities, turn number, newDesign) 
-		# do move first, then check what the next available moves are
+		#Node structure: (distance from start, (point), abilities, turn number, newDesign) 
 
+		# not an exhaustive search, so stop as soon as you find the goal platform, which moves
 		tempGoal = (goal[0], goal[1] - int(node[3] / turns_to_move))
 		if node[1] == tempGoal:
-			print "in here"
-			#need to make nodes contain data on design movements or else they can't move to the same place twice
 			currNode = (node[1], node[2], int(node[3] / turns_to_move))
 			while ANALYSIS[currNode] != None:
 				print currNode
 				path.append(currNode[0])
 				currNode = ANALYSIS[currNode]
 			break
-			# found new spot, build path and return
 
+		# simulate first, THEN check the moves so that we don't get invalid moves
 		tempSim = Simulator(node[4])
 		moves = tempSim.get_moves()
 
@@ -121,14 +122,17 @@ def analyze_specific(thing, goal):
 				newState = (node[0] + value, tempResult[1]['specials'].items()[0][0], abil, tempResult[0], tempResult[1])
 				states.append(newState)
 
-		#Use ANALYSIS like a prev dict, only each key now has states so the solution will be unique for each set of abilities
+		#Use ANALYSIS like a prev dict, only each key now has states so the solution will be unique for each set of abilities 
 		for state in states:
 			curr = (state[1],state[2], int(state[3] / turns_to_move))
 			tent_score = state[0] + distance_heuristic(state[1], tempGoal)
 			if curr not in ANALYSIS or tent_score < state[0]:
+				#need to make nodes contain data on design movements or else they can't move to the same place twice
 				ANALYSIS[curr] = (node[1], node[2], int(node[3] / turns_to_move))
 				state = (tent_score, state[1], state[2], state[3], state[4])
 				q.put(state)
+
+	print "Time taken: ", time.time() - startTime
 	return path
 
 def distance_heuristic(goal, curr):
