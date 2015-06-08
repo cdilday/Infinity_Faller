@@ -7,6 +7,8 @@ import p6_analysis
 import copy
 import time
 
+new_turn = False
+cant_path = False
 TILE_SIZE = 16
 canvas = None
 design = None
@@ -32,11 +34,14 @@ def make_offset():
   return TILE_SIZE*(0.125+0.75*random()), \
          TILE_SIZE*(0.125+0.75*random())
 
-def make_color():
+def make_color1():
   return '#00FFFF'
 
+def make_color2():
+  return '#FF0000'
+
 OFFSETS = defaultdict(make_offset)
-COLORS = defaultdict(make_color)
+#COLORS = defaultdict(make_color)
 
 def next_element(e):
   return ELEMENT_LIST[(ELEMENT_LIST.index(e)+1) % len(ELEMENT_LIST)]
@@ -63,7 +68,7 @@ def display_design_on_canvas(canvas, design):
 
   def draw_inspection_line((i1,j1),(i2,j2),offset_obj=None, color_obj=None):
     oi, oj = OFFSETS[offset_obj]
-    color = COLORS[color_obj]
+    color = color_obj
     canvas.create_line(
         TILE_SIZE * i1 + oi,
         TILE_SIZE * j1 + oj,
@@ -78,17 +83,23 @@ def display_design_on_canvas(canvas, design):
     # item = event.widget.find_closest(event.x, event.y)[0]
     # coords = rect_coords[item]
     # elements[coords] = next_element(elements[coords])
+    global cant_path
+    global new_turn
+    if cant_path and new_turn:
+      cant_path = False
     global turn
     global design
     deletion = False
 
     #print design
     result = None
-    if len(path) is 0:
-      print "drawing new path"
-      redraw_path()
+    if len(path) is 0 or cant_path:
+      if not cant_path:
+        print "drawing new path"
+        redraw_path()
       if len(path) is 0:
         result = take_turn(design, turn, design['specials'].items()[0][0])
+        cant_path = True
       else:
         result = take_turn(design, turn, path[-1])
         deletion = True
@@ -96,6 +107,7 @@ def display_design_on_canvas(canvas, design):
       result = take_turn(design, turn, path[-1])
       deletion = True
     
+    new_turn = result[2]
     global new_elements
   
     if len(path) is 0 and len(new_elements) is 0:
@@ -123,7 +135,7 @@ def display_design_on_canvas(canvas, design):
       bbox = (TILE_SIZE*i+shrink, TILE_SIZE*j+shrink, TILE_SIZE*(i+1)-shrink, TILE_SIZE*(j+1)-shrink)
       canvas.create_oval(bbox, fill='', outline='red',width=2)
 
-    p6_analysis.draw_path(path, draw_inspection_line)
+    p6_analysis.draw_path(path, draw_inspection_line, turn)
     if deletion:
       del path[-1]
 
@@ -171,7 +183,7 @@ def display_design_on_canvas(canvas, design):
   try:
     global path
     path = p6_analysis.analyze_specific(design, coords)
-    p6_analysis.draw_path(path, draw_inspection_line)
+    p6_analysis.draw_path(path, draw_inspection_line, turn)
   except:
     print_exc()
 
@@ -206,7 +218,7 @@ def display_design_on_canvas(canvas, design):
     try:
       global path
       path = p6_analysis.analyze_specific(design, coords)
-      p6_analysis.draw_path(path, draw_inspection_line)
+      p6_analysis.draw_path(path, draw_inspection_line, turn)
     except:
       print_exc()
 
@@ -242,6 +254,7 @@ def move_player((i,j), level):
 
 
 def take_turn(board, turnNum, pos):
+  movedBoard = False
   newBoard = copy.copy(board)
   turnNum += 1
   waiting = False
@@ -255,6 +268,7 @@ def take_turn(board, turnNum, pos):
     newBoard = move_player(pos, newBoard)
     #del path[-1]
   if turnNum % turns_to_move == 0:
+    movedBoard = True
     #move board up
     #first check if player needs to be moved up because they're on the ground
     playerLoc = (newBoard['specials'].items()[0][0])
@@ -276,7 +290,7 @@ def take_turn(board, turnNum, pos):
     fill_bottom_row(board, waiting)
 
     newBoard['elements'] = graph
-  return (turnNum, newBoard)
+  return (turnNum, newBoard, movedBoard)
 
 def fill_bottom_row(board, no_path):
    # use this to load in levels from the generated design

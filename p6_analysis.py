@@ -138,11 +138,17 @@ def distance_heuristic(goal, curr):
 	return dist
 
 
-def draw_path(path, draw_line):	
+def draw_path(path, draw_line, turn_num):	
+	temp_turn = turn_num
 	index = len(path) - 1
-	color = p6_tool.make_color()
+	color = p6_tool.make_color1()
 	offset = (0,0)
 	while index > 0:
+		temp_turn += 1
+		if temp_turn % turns_to_move is 0:
+			color = p6_tool.make_color2()
+		else:
+			color = p6_tool.make_color1()
 		curr = path[index]
 		draw_line(curr, path[index-1], offset, color)
 		index = index - 1
