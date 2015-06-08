@@ -86,11 +86,15 @@ def display_design_on_canvas(canvas, design):
       print "drawing new path"
       # result = take_turn(design, turn, design['specials'].items()[0][0])
       redraw_path()
-      result = take_turn(design, turn, design['specials'].items()[0][0])
+      if len(path) is 0:
+        result = take_turn(design, turn, design['specials'].items()[0][0])
+      else:
+        result = take_turn(design, turn, path[-1])
+        del path[-1]
     else:
       result = take_turn(design, turn, path[-1])
       del path[-1]
-  
+    
     global new_elements
     # if (new_elements):
     #   print len(new_elements)
@@ -112,6 +116,8 @@ def display_design_on_canvas(canvas, design):
 
     turn = result[0]
     design = result[1]
+    global playerLoc
+    playerLoc = design['specials'].items()[0][0]
     #display_design_lite(canvas, design)
     elements = design['elements']
     specials = design['specials']
@@ -181,7 +187,7 @@ def display_design_on_canvas(canvas, design):
 
   def redraw_path():
     coords = (0,0)
-
+    global design
     #override coords with lowest platform goal
     found = False
     y = design['height'] - 2
@@ -208,7 +214,6 @@ def display_design_on_canvas(canvas, design):
 
     try:
       global path
-      print_map(design)
       path = p6_analysis.analyze_specific(design, coords)
       p6_analysis.draw_path(path, draw_inspection_line)
     except:
@@ -292,7 +297,7 @@ def fill_bottom_row(board):
       line_counter = 0
       empty_row.append('A')
     else:
-      print len(new_elements), " ===in fill"
+      # print len(new_elements), " ===in fill"
       ele = new_elements[i, 2+line_counter]
       empty_row.append(ele)
       del new_elements[i, 2+line_counter]
