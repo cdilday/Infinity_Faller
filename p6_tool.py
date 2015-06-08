@@ -15,6 +15,8 @@ playerLoc = None
 path = None
 new_elements = {}
 line_counter = 0
+MAP_HEIGHT = 0
+MAP_WIDTH = 0
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -86,9 +88,6 @@ def display_design_on_canvas(canvas, design):
       result = take_turn(design, turn, path[-1])
       del path[-1]
   
-    if len(path) is 0:
-      pass
-
     global new_elements
     # if (new_elements):
     #   print len(new_elements)
@@ -96,8 +95,9 @@ def display_design_on_canvas(canvas, design):
     #   print 0
 
     if len(path) is 0 and len(new_elements) is 0:
-      new_elements = generate_map(design['width'], design['height'])
-     
+      new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
+      print len(new_elements), "make"
+
     #print len (new_elements)
 
     # for x in range(1, design['width']):
@@ -257,10 +257,11 @@ def fill_bottom_row(board):
       line_counter = 0
       empty_row.append('A')
     else:
-      #print len(new_elements), " ===in fill"
+      print len(new_elements), " ===in fill"
       ele = new_elements[i, 2+line_counter]
       empty_row.append(ele)
       del new_elements[i, 2+line_counter]
+    
 
   line_counter += 1
 
@@ -276,9 +277,28 @@ def print_map(board):
     print tempstr
 
 def generate_map(width, height):
+  ''' 
+    generate platforms in every two columns for a new level/elements dictionary
 
-  specials = {}
+    prev: MAP_WIDTH and MAP_HEIGHT
+    post: a dictionary with generated E elements 
+  '''
+
   elements = {}
+
+  for y_room in range(2, height-2):
+
+    for x_room in range(1, width-1):
+      elements[x_room, y_room] = 'A'
+
+    if y_room % 2 == 0:
+      rand_x = randint(1, width-1-1) 
+
+      elements[rand_x, y_room] = 'E'
+      if rand_x+1 != width-1: 
+        elements[rand_x+1, y_room] = 'E'
+
+  return elements
 
   
   # # two horizontal edges
@@ -322,16 +342,7 @@ def generate_map(width, height):
   #   # rect_coords[t_rect] = (dead_zone,1)
   #   # rect_coords[b_rect] = (dead_zone,height-2)
 
-  max_earth = 10
-  for y_room in range(2, height-2):
 
-    for x_room in range(1, width-1):
-      elements[x_room, y_room] = 'A'
-
-    if y_room % 2 == 0:
-      rand_x = randint(1, width-1)
-      elements[rand_x, y_room] = 'E'
-      elements[rand_x+1, y_room] = 'E'
       # if randint(0, 10) > 5:
       #   elements[rand_x+2, y_room] = 'E'
 
@@ -344,11 +355,10 @@ def generate_map(width, height):
   #   elements[rand_x+1, rand_y] = 'E'
   
 
-  specials[(3,3)] = 0
-  elements[(3,3)] = 'A'
-  elements[(3,4)] = 'E'
+  # specials[(3,3)] = 0
+  # elements[(3,3)] = 'A'
+  # elements[(3,4)] = 'E'
 
-  return elements
   #return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
 
 
@@ -363,8 +373,11 @@ def main(argv):
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
 
-  width = design['width']  # current is 18 by 22
-  height = design['height']
+  global MAP_WIDTH
+  global MAP_HEIGHT
+
+  MAP_WIDTH = design['width']  # current is 18 by 22
+  MAP_HEIGHT = design['height']
 
   # design = {}
   
@@ -375,8 +388,8 @@ def main(argv):
 
   global new_elements
 
-  new_elements = generate_map(width, height)
-  #print "in main", len(new_elements)
+  new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
+  print "in main", len(new_elements)
 
   display_design_on_canvas(canvas, design)
 
