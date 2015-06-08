@@ -81,6 +81,7 @@ def display_design_on_canvas(canvas, design):
     global turn
     global design
     deletion = False
+
     #print design
     result = None
     if len(path) is 0:
@@ -243,8 +244,13 @@ def move_player((i,j), level):
 def take_turn(board, turnNum, pos):
   newBoard = copy.copy(board)
   turnNum += 1
-  if pos is None:
+  waiting = False
+
+  playerLoc = (newBoard['specials'].items()[0][0])
+  if pos is playerLoc:
     print "Waiting"
+    waiting = True
+
   else:
     newBoard = move_player(pos, newBoard)
     #del path[-1]
@@ -266,12 +272,13 @@ def take_turn(board, turnNum, pos):
         x += 1
       y += 1
 
-    fill_bottom_row(board)
+    
+    fill_bottom_row(board, waiting)
 
     newBoard['elements'] = graph
   return (turnNum, newBoard)
 
-def fill_bottom_row(board):
+def fill_bottom_row(board, no_path):
    # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
 
@@ -281,7 +288,11 @@ def fill_bottom_row(board):
   if 2 + line_counter == board['height']-2 :
     line_counter = 0
 
+  player_x, player_y = board['specials'].items()[0][0]
+  
+
   for x in range(0, board['width']):
+    #board['elements'][x, board['height'] - 3] = 'A'
     if (x == 0 or x == board['width'] - 1 ):
       board['elements'][x, board['height'] - 3] = 'E'
     elif len(new_elements) is 0:
@@ -289,6 +300,13 @@ def fill_bottom_row(board):
     else:
       board['elements'][x, board['height'] - 3] = new_elements[x, 2+line_counter]
       del new_elements[x, 2+line_counter]
+
+  # if the player is at upper half of the canvas and no path, draw a reachable platform 
+  if (player_y <= int((board['height'] -3)/2)  and no_path):
+    reachable_x = randint(max(1,player_x-2), min(player_x+2, board['width'] - 1))
+    print "reachable ensured"
+    board['elements'][reachable_x, board['height'] - 3] = 'E'
+    board['elements'][reachable_x+1, board['height'] - 3] = 'E'
 
   line_counter += 1
 
