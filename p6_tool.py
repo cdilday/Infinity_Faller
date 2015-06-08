@@ -14,6 +14,7 @@ turns_to_move = 2
 playerLoc = None
 path = None
 new_elements = {}
+line_counter = 0
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -96,7 +97,7 @@ def display_design_on_canvas(canvas, design):
 
     if len(path) is 0 and len(new_elements) is 0:
       new_elements = generate_map(design['width'], design['height'])
-
+     
     #print len (new_elements)
 
     # for x in range(1, design['width']):
@@ -244,15 +245,24 @@ def fill_bottom_row(board):
   # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
   global new_elements
+  global line_counter
+
+  if 2+line_counter == 20 :
+    line_counter = 0
+
   empty_row = []
   empty_row.append('E')
   for i in range(1, board['width'] - 1 ):
     if len(new_elements) is 0:
+      line_counter = 0
       empty_row.append('A')
     else:
-      ele = new_elements[i, 3]
+      #print len(new_elements), " ===in fill"
+      ele = new_elements[i, 2+line_counter]
       empty_row.append(ele)
-      del new_elements[i, 3]
+      del new_elements[i, 2+line_counter]
+
+  line_counter += 1
 
   empty_row.append('E')
   for x in range(0, board['width']):
@@ -313,7 +323,6 @@ def generate_map(width, height):
   #   # rect_coords[b_rect] = (dead_zone,height-2)
 
   max_earth = 10
-  even = 0
   for y_room in range(2, height-2):
 
     for x_room in range(1, width-1):
@@ -354,14 +363,20 @@ def main(argv):
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
 
-  width = design['width'] 
+  width = design['width']  # current is 18 by 22
   height = design['height']
+
   # design = {}
   
   # design = generate_map(width, height)
   global canvas
   canvas = Canvas(master, width=w, height=h)
   canvas.pack()
+
+  global new_elements
+
+  new_elements = generate_map(width, height)
+  #print "in main", len(new_elements)
 
   display_design_on_canvas(canvas, design)
 
