@@ -8,6 +8,7 @@ try:
 except ImportError:
     import queue as Q
 
+from heapq import heappush, heappop
 import p6_tool
 
 ANALYSIS = {}
@@ -75,6 +76,10 @@ def inspect(report, (i,j), draw_line):
 	return path
 	#raise NotImplementedError
 
+#A* with 3 heuristics: 
+	# 1.distance to point
+	# 2. check if it's passed the point vertically
+	# 3. check if it's stalling on a platform
 def analyze_specific(thing, goal):
 	startTime = time.time()
 	tempDesign = copy.deepcopy(thing)
@@ -88,11 +93,10 @@ def analyze_specific(thing, goal):
 	startingNode = (init[0], init[1], 0)
 	ANALYSIS[startingNode] = None
 
-	q = Q.PriorityQueue()
-	q.put((0, init[0], init[1], 0, tempDesign, sim))
+	q = [(0, init[0], init[1], 0, tempDesign, sim)]
 
-	while not q.empty():
-		node = q.get()
+	while q:
+		node = heappop(q)
 		print (node[1], node[2], int(node[3] / turns_to_move))
 		#Node structure: (distance from start, (point), abilities, turn number, newDesign) 
 
@@ -127,11 +131,13 @@ def analyze_specific(thing, goal):
 		for state in states:
 			curr = (state[1],state[2], int(state[3] / turns_to_move))
 			tent_score = state[0] + distance_heuristic(state[1], tempGoal)
-			if (curr not in ANALYSIS or tent_score < state[0]) and state[1][1] <= tempGoal[1] :
-				#need to make nodes contain data on design movements or else they can't move to the same place twice
-				ANALYSIS[curr] = (node[1], node[2], int(node[3] / turns_to_move))
-				state = (tent_score, state[1], state[2], state[3], state[4])
-				q.put(state)
+			# ignore nodes that are stalling; they already have no valid path
+			if init[0][1] - state[1][1] <= 1:
+				if (curr not in ANALYSIS or tent_score < state[0]) and state[1][1] <= tempGoal[1] :
+					#need to make nodes contain data on design movements or else they can't move to the same place twice
+					ANALYSIS[curr] = (node[1], node[2], int(node[3] / turns_to_move))
+					state = (tent_score, state[1], state[2], state[3], state[4])
+					heappush(q, state)
 
 	print "Time taken: ", time.time() - startTime
 	return path
