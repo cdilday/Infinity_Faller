@@ -20,6 +20,7 @@ new_elements = {}
 line_counter = 0
 MAP_HEIGHT = 0
 MAP_WIDTH = 0
+master = None
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -47,6 +48,7 @@ def next_element(e):
   return ELEMENT_LIST[(ELEMENT_LIST.index(e)+1) % len(ELEMENT_LIST)]
 
 def display_design_on_canvas(canvas, design):
+  
   canvas.delete(ALL)
 
   width, height = design['width'], design['height']
@@ -54,6 +56,7 @@ def display_design_on_canvas(canvas, design):
   specials = design['specials']
 
   rect_coords = {}
+  it_happen = None
   for i in range(width):
     for j in range(height):
       bbox = (TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE*(i+1), TILE_SIZE*(j+1))
@@ -79,7 +82,7 @@ def display_design_on_canvas(canvas, design):
         width=4,
     )
 
-  def click(event):
+  def click():
     # item = event.widget.find_closest(event.x, event.y)[0]
     # coords = rect_coords[item]
     # elements[coords] = next_element(elements[coords])
@@ -139,20 +142,23 @@ def display_design_on_canvas(canvas, design):
     if deletion:
       del path[-1]
 
-  def enter(event):
-    filler = 1+1
-    #item = event.widget.find_closest(event.x, event.y)[0]
-    #coords = rect_coords[item]
+  # def enter(event):
+   
+   
+  #   print " 1- enter"
+  #   filler = 1+1
+  #   #item = event.widget.find_closest(event.x, event.y)[0]
+  #   #coords = rect_coords[item]
 
-    # try:
-    #   global path
-    #   path = p6_analysis.analyze_specific(design, coords)
-    #   p6_analysis.draw_path(path, draw_inspection_line)
-    # except:
-    #   print_exc()
+  #   # try:
+  #   #   global path
+  #   #   path = p6_analysis.analyze_specific(design, coords)
+  #   #   p6_analysis.draw_path(path, draw_inspection_line)
+  #   # except:
+  #   #   print_exc()
 
-  canvas.bind('<ButtonPress-1>',click)
-  canvas.tag_bind('tile','<Enter>',enter)
+  #canvas.bind('<ButtonPress-1>',click)
+  #canvas.tag_bind('tile','<Enter>',enter)
   
   coords = (0,0)
 
@@ -186,6 +192,8 @@ def display_design_on_canvas(canvas, design):
     p6_analysis.draw_path(path, draw_inspection_line, turn)
   except:
     print_exc()
+
+  
 
   def redraw_path():
     coords = (0,0)
@@ -221,6 +229,8 @@ def display_design_on_canvas(canvas, design):
       p6_analysis.draw_path(path, draw_inspection_line, turn)
     except:
       print_exc()
+
+  return click
 
 
 def load_design(filename):
@@ -293,6 +303,7 @@ def take_turn(board, turnNum, pos):
   return (turnNum, newBoard, movedBoard)
 
 def fill_bottom_row(board, no_path):
+  print "5_fill_bottom"
    # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
 
@@ -417,13 +428,19 @@ def generate_map(width, height):
 
   #return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
 
+def auto_click(master, on_click):
+  
+    master.after(1, on_click)
+    master.after(1000, auto_click, master, on_click)
+   
 
-def main(argv):
+def main(argv, first_call):
 
   prog, filename = argv 
   global design 
   design = load_design(filename)
 
+  global master 
   master = Tk()
   master.title("Infinity Fall")
 
@@ -446,13 +463,22 @@ def main(argv):
   new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
   
 
-  display_design_on_canvas(canvas, design)
+  on_click =display_design_on_canvas(canvas, design)
+
 
   master.bind('<Escape>', lambda event: master.quit())
 
+  master.after(1000, auto_click, master, on_click)
+ 
+  
   master.mainloop()
+  # while (True):
+  #   if timing %100 > 0: 
+  #     master.after(1, on_click)
+  #   timing =+ 1
+
 
 
 if __name__ == '__main__':
   import sys
-  main(sys.argv)
+  main(sys.argv, True)

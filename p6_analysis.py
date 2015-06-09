@@ -91,7 +91,7 @@ def analyze_specific(thing, goal):
 
 			# build path
 			while ANALYSIS[currNode] != None:
-				print currNode
+				# print currNode
 				path.append(currNode[0])
 				currNode = ANALYSIS[currNode]
 			break
