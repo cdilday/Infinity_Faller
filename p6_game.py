@@ -7,12 +7,9 @@ class Simulator(object):
       'NOTHING',
   ]
   
-  ABILITIES = [
-    'water_survival',
-    'water_flying',
-    'fire_survival',
-    'air_flying',
-  ]
+  # ABILITIES = [
+  #   'fire_survival',
+  # ]
 
   def __init__(self, design):
     self.elements = design['elements']
@@ -31,13 +28,15 @@ class Simulator(object):
     pos, abilities = state  
 
     next_pos = self._resolve_movement(pos, abilities, move)
-    if next_pos in self.specials:
-      next_abilities = self._upgrade_abilities(abilities, self.specials[next_pos])
-    else:
-      next_abilities = abilities
+    # if next_pos in self.specials:
+    #   next_abilities = self._upgrade_abilities(abilities, self.specials[next_pos])
+    # else:
+    #   next_abilities = abilities
 
-    if self._can_survive_with_abilities(self.elements[next_pos], next_abilities):
-      return next_pos, next_abilities
+
+    #if self._can_survive_with_abilities(self.elements[next_pos], next_abilities):
+    if self.elements[next_pos] is 'A':
+      return next_pos, abilities
     else:
       return None
 
@@ -54,22 +53,18 @@ class Simulator(object):
       (env[4] is 'A' and 'air_flying' in abilities) \
   
     # ignore movement into a wall
-    if   move is 'LEFT' and env[3] is 'E':
+    if move is 'LEFT' and env[3] is 'E':
       move = 'NOTHING'
     elif move is 'RIGHT' and env[5] is 'E':
       move = 'NOTHING'
   
     # check for support from earth or flying
     if not supported:
-      if   move is 'UP':
-        move = 'NOTHING'
-      elif move is 'NOTHING':
+      if move is 'NOTHING':
         move = 'DOWN'
   
     # ignore upward movement into a way
-    if move is 'UP' and env[1] is 'E':
-      move = 'NOTHING'
-    elif move is 'DOWN' and env[7] is 'E':
+    if move is 'DOWN' and env[7] is 'E':
       move = 'NOTHING'
   
     # transate moves into new positions
@@ -83,29 +78,21 @@ class Simulator(object):
         return (i+1,j)
       else:
         return (i+1,j+1)
-    elif move is 'UP':
-      return (i,j-1)
     elif move is 'DOWN':
       return (i,j+1)
     else:
       return (i,j)
 
-  def _can_survive_with_abilities(self, element, abilities):
-    if   element is 'A':
-      return True # always remain alive in the air
-    elif element is 'E':
-      return False # alway die when somehow in earth
-    elif element is 'W':
-      return 'water_survival' in abilities
-    elif element is 'F':
-      return 'fire_survival' in abilities
+  # def _can_survive_with_abilities(self, element, abilities):
+  #   if element is 'F':
+  #     return 'fire_survival' in abilities
   
-  def _upgrade_abilities(self, abilities, special):
-    if special is 0 or special is 5:
-      return abilities # no change for these markers
-    else:
-      new_ability = self.ABILITIES[special-1]
-      if new_ability in abilities:
-        return abilities
-      else:
-        return abilities | frozenset([new_ability])
+  # def _upgrade_abilities(self, abilities, special):
+  #   if special is 0 or special is 5:
+  #     return abilities # no change for these markers
+  #   else:
+  #     new_ability = self.ABILITIES[special-1]
+  #     if new_ability in abilities:
+  #       return abilities
+  #     else:
+  #       return abilities | frozenset([new_ability])

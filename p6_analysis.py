@@ -88,7 +88,7 @@ def analyze_specific(thing, goal):
 
 		if node[1] == tempGoal:
 			currNode = (node[1], node[2], turns_number(node[3]))
-
+			
 			# build path
 			while ANALYSIS[currNode] != None:
 				# print currNode

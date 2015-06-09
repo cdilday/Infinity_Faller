@@ -18,9 +18,13 @@ playerLoc = None
 path = None
 new_elements = {}
 line_counter = 0
-MAP_HEIGHT = 0
-MAP_WIDTH = 0
+MAP_HEIGHT = 22
+MAP_WIDTH = 18
 master = None
+stop_pressed = False
+on_click = None
+file_num = 0
+
 
 ELEMENT_COLORS = {
   'E': 'black',
@@ -143,22 +147,22 @@ def display_design_on_canvas(canvas, design):
       del path[-1]
 
   # def enter(event):
-   
-   
-  #   print " 1- enter"
-  #   filler = 1+1
-  #   #item = event.widget.find_closest(event.x, event.y)[0]
-  #   #coords = rect_coords[item]
+  def save_map(event):
+    global file_num
+    file_num += 1
+    filename = "generate_map_" + str(file_num) + ".txt"
+    f = open(filename, 'w')
+  
+    for y in range(0, MAP_HEIGHT):
+      tempstr = ""
+      for x in range(0, MAP_WIDTH):
+        tempstr = tempstr +  design['elements'][x,y] + " " 
+      print tempstr
+      f.write(tempstr+"\n")
+    print "save to file: ", filename
 
-  #   # try:
-  #   #   global path
-  #   #   path = p6_analysis.analyze_specific(design, coords)
-  #   #   p6_analysis.draw_path(path, draw_inspection_line)
-  #   # except:
-  #   #   print_exc()
 
-  #canvas.bind('<ButtonPress-1>',click)
-  #canvas.tag_bind('tile','<Enter>',enter)
+  canvas.bind('<ButtonPress-1>',save_map)
   
   coords = (0,0)
 
@@ -302,8 +306,10 @@ def take_turn(board, turnNum, pos):
     newBoard['elements'] = graph
   return (turnNum, newBoard, movedBoard)
 
+
+
 def fill_bottom_row(board, no_path):
-  print "5_fill_bottom"
+
    # use this to load in levels from the generated design
   # right now we'll just load it with empties until we get that implemented
 
@@ -367,118 +373,132 @@ def generate_map(width, height):
 
   return elements
 
+def generate_first_map(width, height):
   
-  # # two horizontal edges
-  # for row in range(width): # range (x,y) --> x <= n < y
-  #   #print elements[row,0]
-  #   elements[row, 0] = 'E'
-  #   elements[row, height-1] = 'E' # height - 1 is the lowest index
-  #   # first_row_box = (TILE_SIZE*row, TILE_SIZE*0, TILE_SIZE*(row+1), TILE_SIZE*(1))
-  #   # last_row_box = (TILE_SIZE*row, TILE_SIZE*height-1, TILE_SIZE*(row+1), TILE_SIZE*(height-1+1))
-    
-  #   # f_color = ELEMENT_COLORS['E']
-  #   # l_color = ELEMENT_COLORS['E']
-  #   # f_rect = canvas.create_rectangle(first_row_box, fill=f_color, tags=('tile',), outline='')
-  #   # l_rect = canvas.create_rectangle(last_row_box, fill=l_color, tags=('tile',), outline='')
-  #   # rect_coords[f_rect] = (row,0)
-  #   # rect_coords[l_rect] = (row,height-1)
-
-  # # two vertical edges
-  # for col in range(height): 
-  #   elements[0, col] = 'E'
-  #   elements[width-1, col] = 'E' # width - 1 is the right most index
-  #   # first_col_box = (TILE_SIZE*0, TILE_SIZE*col, TILE_SIZE*(0+1), TILE_SIZE*(col+1))
-  #   # last_col_box = (TILE_SIZE*width-1, TILE_SIZE*col, TILE_SIZE*(width-1+1), TILE_SIZE*(col+1))
-  #   # f_olor = ELEMENT_COLORS['E']
-  #   # l_olor = ELEMENT_COLORS['E']
-  #   # f_rect = canvas.create_rectangle(first_col_box, fill=f_color, tags=('tile',), outline='')
-  #   # l_rect = canvas.create_rectangle(last_col_box, fill=l_color, tags=('tile',), outline='')
-  #   # rect_coords[first_col_box] = (0,col)
-  #   # rect_coords[last_col_box] = (width-1,col)
-
-  # # assign dead zone 
-  # for dead_zone in range (1, width-1): 
-  #   elements[dead_zone, 1] = 'F'
-  #   elements[dead_zone, height-2] = 'F'
-  #   # top_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*1, TILE_SIZE*(dead_zone+1), TILE_SIZE*(1+1))
-  #   # bot_dead_box = (TILE_SIZE*dead_zone, TILE_SIZE*(height-2), TILE_SIZE*(dead_zone+1), TILE_SIZE*(height-2+1))
-  #   # t_color = ELEMENT_COLORS['F']
-  #   # b_color = ELEMENT_COLORS['F']
-  #   # t_rect = canvas.create_rectangle(top_dead_box, fill=t_color, tags=('tile',), outline='')
-  #   # b_rect = canvas.create_rectangle(bot_dead_box, fill=b_color, tags=('tile',), outline='')
-  #   # rect_coords[t_rect] = (dead_zone,1)
-  #   # rect_coords[b_rect] = (dead_zone,height-2)
-
-
-      # if randint(0, 10) > 5:
-      #   elements[rand_x+2, y_room] = 'E'
-
-
-  # for e in range(max_earth+1):
-  #   rand_x = randint(1, width-1)
-  #   rand_y = randint(2, height-2-1)
-  #   #if specials[(rand_x, rand_y)] is None:
-  #   elements[rand_x, rand_y] = 'E'
-  #   elements[rand_x+1, rand_y] = 'E'
+  elements = {}
+  specials = {}
+  # two horizontal edges
+  for row in range(width): # range (x,y) --> x <= n < y
+    #print elements[row,0]
+    elements[row, 0] = 'E'
+    elements[row, height-1] = 'E' # height - 1 is the lowest index
+  
+  # two vertical edges
+  for col in range(height): 
+    elements[0, col] = 'E'
+    elements[width-1, col] = 'E' # width - 1 is the right most index
   
 
-  # specials[(3,3)] = 0
-  # elements[(3,3)] = 'A'
-  # elements[(3,4)] = 'E'
+  # assign dead zone 
+  for dead_zone in range (1, width-1): 
+    elements[dead_zone, 1] = 'F'
+    elements[dead_zone, height-2] = 'F'
+    # if randint(0, 10) > 5:
+    #   elements[rand_x+2, y_room] = 'E'
 
-  #return {'elements': elements, 'specials': specials, 'width': width, 'height': height}
+  content = {}
+  content = generate_map(width, height)
+
+  all_ele = dict(elements.items() + content.items())
+
+  specials[(3,3)] = 0
+  elements[(3,3)] = 'A'
+  elements[(3,4)] = 'E'
+
+  return {'elements': all_ele, 'specials': specials, 'width': width, 'height': height}
 
 def auto_click(master, on_click):
-  
+    global stop_pressed
     master.after(1, on_click)
-    master.after(1000, auto_click, master, on_click)
-   
+    if not stop_pressed:
+      master.after(1000, auto_click, master, on_click)
 
-def main(argv, first_call):
+def callback():
+    print "I am free! Free falling!"
+    print "Click on Canvas to save a map"
 
-  prog, filename = argv 
+def stop_auto():
+    global stop_pressed
+    #if stop_pressed:
+    stop_pressed = not stop_pressed  
+    if not stop_pressed:
+      global master
+      global on_click
+      auto_click(master, on_click)
+
+def main(argv):
+
+  if len(argv) == 2:
+    prog, filename = argv 
+  elif len(argv) >2:
+    print 
+    print "Unexpected number of arguements"
+    print "Usage: ", argv[0], " file_name(optional)"
+    print 
+    return
+  else:
+    filename = None
+
   global design 
-  design = load_design(filename)
 
+  if filename:
+    design = load_design(filename)
+  else:
+
+    global MAP_WIDTH
+    global MAP_HEIGHT    
+    design = generate_first_map(MAP_WIDTH, MAP_HEIGHT)
+
+  global canvas
   global master 
   master = Tk()
   master.title("Infinity Fall")
 
   w, h = TILE_SIZE*design['width'], TILE_SIZE*design['height']
-
-  global MAP_WIDTH
-  global MAP_HEIGHT
-
-  MAP_WIDTH = design['width']  # current is 18 by 22
-  MAP_HEIGHT = design['height']
-
-  # design = {}
-  
-  # design = generate_map(width, height)
-  global canvas
   canvas = Canvas(master, width=w, height=h)
   canvas.pack()
 
   global new_elements
   new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
   
-
+  global on_click
   on_click =display_design_on_canvas(canvas, design)
 
 
   master.bind('<Escape>', lambda event: master.quit())
 
   master.after(1000, auto_click, master, on_click)
+
+  # message = Button(master, text="Click on the canvas to save a map", command=callback)
+  # message.pack()
+  message = Text(master, height=2, width=35)
+  message.pack()
+  message.insert(END, "Click on the Canvas to Save a Map")
+  stopBtn = Button(master, text="Clcik Here to Stop/Continue", command=stop_auto)
+  stopBtn.pack()
  
   
   master.mainloop()
-  # while (True):
-  #   if timing %100 > 0: 
-  #     master.after(1, on_click)
-  #   timing =+ 1
-
+  
 
 
 if __name__ == '__main__':
   import sys
-  main(sys.argv, True)
+
+  main(sys.argv)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
