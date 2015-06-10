@@ -9,7 +9,7 @@ import time
 
 new_turn = False
 cant_path = False
-TILE_SIZE = 16
+TILE_SIZE = 24
 canvas = None
 design = None
 turn = 0
@@ -21,9 +21,12 @@ line_counter = 0
 MAP_HEIGHT = 22
 MAP_WIDTH = 18
 master = None
+
 stop_pressed = False
-on_click = None
+next_turn = None
 file_num = 0
+saveBtn = None
+stopBtn = None
 
 
 ELEMENT_COLORS = {
@@ -86,7 +89,8 @@ def display_design_on_canvas(canvas, design):
         width=4,
     )
 
-  def click():
+
+  def next_turn():
     # item = event.widget.find_closest(event.x, event.y)[0]
     # coords = rect_coords[item]
     # elements[coords] = next_element(elements[coords])
@@ -146,8 +150,8 @@ def display_design_on_canvas(canvas, design):
     if deletion:
       del path[-1]
 
-  # def enter(event):
-  def save_map(event):
+  
+  def save_map():
     global file_num
     file_num += 1
     filename = "generate_map_" + str(file_num) + ".txt"
@@ -160,9 +164,10 @@ def display_design_on_canvas(canvas, design):
       print tempstr
       f.write(tempstr+"\n")
     print "save to file: ", filename
+    global saveBtn
 
 
-  canvas.bind('<ButtonPress-1>',save_map)
+    saveBtn['text'] = "Save Map to generate_map_"+str(file_num) + ".txt"
   
   coords = (0,0)
 
@@ -234,7 +239,7 @@ def display_design_on_canvas(canvas, design):
     except:
       print_exc()
 
-  return click
+  return next_turn, save_map
 
 
 def load_design(filename):
@@ -336,6 +341,8 @@ def fill_bottom_row(board, no_path):
   if (player_y <= int((board['height'] -3)/2)  and no_path):
     reachable_x = randint(max(1,player_x-2), min(player_x+2, board['width'] - 1))
     print "reachable ensured"
+    for x in range(1, board['width']-1):
+       board['elements'][x, board['height'] - 3] = 'A'
     board['elements'][reachable_x, board['height'] - 3] = 'E'
     board['elements'][reachable_x+1, board['height'] - 3] = 'E'
 
@@ -407,24 +414,24 @@ def generate_first_map(width, height):
 
   return {'elements': all_ele, 'specials': specials, 'width': width, 'height': height}
 
-def auto_click(master, on_click):
+def auto_click(master, next_turn):
     global stop_pressed
-    master.after(1, on_click)
+    master.after(1, next_turn)
     if not stop_pressed:
-      master.after(1000, auto_click, master, on_click)
-
-def callback():
-    print "I am free! Free falling!"
-    print "Click on Canvas to save a map"
+      master.after(1000, auto_click, master, next_turn)
 
 def stop_auto():
     global stop_pressed
+    global stopBtn
+    stopBtn['text'] = "Click here to Continue"
+
     #if stop_pressed:
     stop_pressed = not stop_pressed  
     if not stop_pressed:
+      stopBtn['text'] = "Click here to Stop"
       global master
-      global on_click
-      auto_click(master, on_click)
+      global next_turn
+      auto_click(master, next_turn)
 
 def main(argv):
 
@@ -461,21 +468,21 @@ def main(argv):
   global new_elements
   new_elements = generate_map(MAP_WIDTH, MAP_HEIGHT)
   
-  global on_click
-  on_click =display_design_on_canvas(canvas, design)
+  global next_turn
+  next_turn, save_map_func = display_design_on_canvas(canvas, design)
 
 
   master.bind('<Escape>', lambda event: master.quit())
 
-  master.after(1000, auto_click, master, on_click)
+  master.after(1000, auto_click, master, next_turn)
 
-  # message = Button(master, text="Click on the canvas to save a map", command=callback)
-  # message.pack()
-  message = Text(master, height=2, width=35)
-  message.pack()
-  message.insert(END, "Click on the Canvas to Save a Map")
-  stopBtn = Button(master, text="Clcik Here to Stop/Continue", command=stop_auto)
+  global stopBtn
+  stopBtn = Button(master, text="Clcik Here to Stop", command=stop_auto)
   stopBtn.pack()
+
+  global saveBtn
+  saveBtn = Button(master, text="Save Map to generate_map_1.txt", command=save_map_func )
+  saveBtn.pack()
  
   
   master.mainloop()

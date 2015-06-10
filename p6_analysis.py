@@ -24,7 +24,7 @@ def is_falling(player_y, next_y):
 		if the next state is moving down, return True
 	'''
 	#return (player_y - next_y <= 1)
-	return next_y > player_y -1
+	return next_y > player_y - 2
 
 def is_miss_the_goal(next_y, goal_y):
 	''' if next_state passes the goal state, return True'''
@@ -88,7 +88,7 @@ def analyze_specific(thing, goal):
 
 		if node[1] == tempGoal:
 			currNode = (node[1], node[2], turns_number(node[3]))
-			
+
 			# build path
 			while ANALYSIS[currNode] != None:
 				# print currNode
